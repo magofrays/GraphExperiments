@@ -21,6 +21,15 @@ void Graph::create_random_graph(size_t elements, double probability)
     }
 }
 
+void Graph::remove_vertex(size_t id)
+{
+    for (size_t i = 0; i != elements; i++)
+    {
+        graph[i].erase(graph[i].begin() + id);
+    }
+    graph.erase(graph.begin() + id);
+}
+
 void Graph::print_matrix()
 {
     for (size_t i = 0; i != elements; i++)
