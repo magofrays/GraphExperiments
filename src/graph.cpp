@@ -5,6 +5,8 @@
 
 void Graph::create_random_graph(size_t elements, double probability)
 {
+    ids.resize(elements);
+    std::iota(ids.begin(), ids.end(), 0);
     graph.clear();
     this->elements = elements;
     this->probability = probability;
@@ -22,6 +24,12 @@ void Graph::create_random_graph(size_t elements, double probability)
     }
 }
 
+Graph::Graph(std::vector<vertex> graph, size_t elements) : graph(graph), elements(elements)
+{
+    ids.resize(elements);
+    std::iota(ids.begin(), ids.end(), 0);
+}
+
 void Graph::remove_vertex(size_t id)
 {
     for (size_t i = 0; i != elements; i++)
@@ -29,6 +37,7 @@ void Graph::remove_vertex(size_t id)
         graph[i].erase(graph[i].begin() + id);
     }
     graph.erase(graph.begin() + id);
+    ids.erase(ids.begin() + id);
     elements--;
 }
 
@@ -51,10 +60,10 @@ void Graph::print_matrix()
     }
 }
 
-void Graph::set_standart_positions()
+void Graph::set_positions_on_square()
 {
     int row_size = std::sqrt(elements);
-    positions = std::vector<std::pair<int, int>>(elements);
+    positions = std::vector<std::pair<double, double>>(elements);
     int y = 1;
     for (int i = 0; i != elements; i++)
     {
@@ -64,5 +73,15 @@ void Graph::set_standart_positions()
             y++;
         }
         positions[i] = {x, y};
+    }
+}
+
+void Graph::set_positions_around_circle()
+{
+    positions = std::vector<std::pair<double, double>>(elements);
+    for (int i = 0; i != elements; i++)
+    {
+        double k = i * M_PI * 2 / elements;
+        positions[i] = {std::sin(k), std::cos(k)};
     }
 }

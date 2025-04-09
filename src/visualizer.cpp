@@ -64,19 +64,19 @@ void Visualizer::show()
         view->show();
 }
 
-void Visualizer::draw_graph(const Graph &g)
+void Visualizer::draw_graph(const Graph &g, int x, int y)
 {
     std::vector<QGraphicsEllipseItem *> nodes;
     const int radius = 20;
-    const int node_distance = 300;
+    const int node_distance = 200 * g.elements / 10;
     int k = 1;
     for (size_t i = 0; i < g.elements; ++i)
     {
         auto node = new QGraphicsEllipseItem(0, 0, 2 * radius, 2 * radius);
-        node->setPos(g.positions[i].first * node_distance, g.positions[i].second * node_distance);
+        node->setPos(g.positions[i].first * node_distance + x, g.positions[i].second * node_distance + y);
         node->setBrush(Qt::blue);
 
-        auto text = new QGraphicsSimpleTextItem(QString::number(i), node);
+        auto text = new QGraphicsSimpleTextItem(QString::number(g.ids[i]), node);
         text->setPos(radius - 5, radius - 8);
         nodes.push_back(node);
     }

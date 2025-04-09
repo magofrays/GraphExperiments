@@ -39,7 +39,7 @@ public:
     int exec();
     void show();
     static Visualizer *instance(int argc = 0, char **argv = nullptr);
-    void draw_graph(const Graph &g);
+    void draw_graph(const Graph &g, int x = 0, int y = 0);
 
 protected:
     static Visualizer *visualizer;
