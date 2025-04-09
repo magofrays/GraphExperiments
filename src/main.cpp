@@ -1,11 +1,16 @@
-#include "headers/graph.h"
+#include <iostream>
+#include "headers/karger_algorithm.h"
+#include "headers/visualizer.h"
 
-int main(int argc, char const *argv[])
+int main(int argc, char **argv)
 {
+    Visualizer *gui = Visualizer::instance(argc, argv);
+
     Graph graph;
-    graph.create_random_graph(10, 0.5);
-    graph.print_matrix();
-    graph.remove_vertex(5); // fix
-    graph.print_matrix();
-    return 0;
+    graph.create_random_graph(9, 0.5);
+    graph.set_standart_positions();
+
+    gui->draw_graph(graph);
+    gui->show();
+    return gui->exec();
 }

@@ -1,6 +1,6 @@
 #include "headers/karger_algorithm.h"
 
-Graph pull_together(const Graph &graph, size_t first, size_t second)
+Graph pull_together(const Graph &graph, int first, int second)
 {
     Graph new_graph(graph);
     for (size_t i = 0; i != new_graph.elements; i++)
@@ -9,5 +9,9 @@ Graph pull_together(const Graph &graph, size_t first, size_t second)
         new_graph[i][first] = graph[i][first] || graph[i][second];
     }
     new_graph.remove_vertex(second);
+    for (size_t i = 0; i != new_graph.elements; i++)
+    {
+        new_graph[i][i] = 0;
+    }
     return new_graph;
 }

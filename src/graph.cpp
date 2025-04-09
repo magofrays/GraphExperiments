@@ -1,6 +1,7 @@
 #include "headers/graph.h"
 #include "headers/random_generator.h"
 #include <iostream>
+#include <cmath>
 
 void Graph::create_random_graph(size_t elements, double probability)
 {
@@ -28,6 +29,7 @@ void Graph::remove_vertex(size_t id)
         graph[i].erase(graph[i].begin() + id);
     }
     graph.erase(graph.begin() + id);
+    elements--;
 }
 
 void Graph::print_matrix()
@@ -46,5 +48,21 @@ void Graph::print_matrix()
             }
         }
         std::cout << "\n";
+    }
+}
+
+void Graph::set_standart_positions()
+{
+    int row_size = std::sqrt(elements);
+    positions = std::vector<std::pair<int, int>>(elements);
+    int y = 1;
+    for (int i = 0; i != elements; i++)
+    {
+        int x = (i % row_size);
+        if (i % row_size == 0)
+        {
+            y++;
+        }
+        positions[i] = {x, y};
     }
 }
