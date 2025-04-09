@@ -1,7 +1,9 @@
 #ifndef GRAPH_H
 #define GRAPH_H
+
 #include <vector>
 #include <numeric>
+#include "headers/random_generator.h"
 
 using vertex = std::vector<bool>;
 

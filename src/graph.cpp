@@ -1,5 +1,4 @@
 #include "headers/graph.h"
-#include "headers/random_generator.h"
 #include <iostream>
 #include <cmath>
 
@@ -38,6 +37,7 @@ void Graph::remove_vertex(size_t id)
     }
     graph.erase(graph.begin() + id);
     ids.erase(ids.begin() + id);
+    positions.erase(positions.begin() + id);
     elements--;
 }
 

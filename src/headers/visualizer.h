@@ -6,10 +6,10 @@
 #include <QGraphicsView>
 #include <QGraphicsEllipseItem>
 #include <QGraphicsLineItem>
-#include "graph.h"
 #include <QGraphicsPolygonItem>
 #include <cmath>
 #include <QtMath>
+#include "graph.h"
 
 class Arrow : public QGraphicsLineItem
 {
@@ -24,6 +24,28 @@ private:
     QPolygonF createArrowHead() const;
 
     void updateArrowHead();
+};
+
+class LoopArrow : public QGraphicsItem
+{
+public:
+    LoopArrow(QGraphicsItem *parent = nullptr)
+        : QGraphicsItem(parent), m_radius(20), m_angle(90) {}
+
+    QRectF boundingRect() const
+    {
+        return QRectF(-m_radius - 10, -m_radius - 10,
+                      2 * m_radius + 20, 2 * m_radius + 20);
+    }
+
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *);
+
+    void setRadius(qreal radius) { m_radius = radius; }
+    void setAngle(qreal angle) { m_angle = angle; }
+
+private:
+    qreal m_radius;
+    qreal m_angle;
 };
 
 class Visualizer
