@@ -4,9 +4,10 @@
 #include <random>
 #include <vector>
 
+static std::mt19937 generator(std::random_device{}());
+
 inline bool should_generate(double probability)
 {
-    static std::mt19937 generator(std::random_device{}());
     std::uniform_real_distribution<double> distribution(0.0, 1.0);
     return distribution(generator) <= probability;
 }
@@ -14,13 +15,18 @@ inline bool should_generate(double probability)
 template <typename T>
 inline typename std::vector<T>::iterator random_choice(std::vector<T> &elements)
 {
-    static std::mt19937 generator(std::random_device{}());
     if (elements.empty())
     {
         return elements.end();
     }
-    std::uniform_int_distribution<size_t> dist(0, elements.size() - 1);
+    std::uniform_int_distribution<int> dist(0, elements.size() - 1);
     return elements.begin() + dist(generator);
+}
+
+inline int randrange(int start, int end)
+{
+    std::uniform_int_distribution<int> dist(start, end);
+    return dist(generator);
 }
 
 #endif
