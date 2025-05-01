@@ -1,3 +1,6 @@
+#ifndef AHO_CORASICK_H
+#define AHO_CORASICK_H
+
 #include <vector>
 #include <algorithm>
 #include <iostream>
@@ -104,7 +107,7 @@ struct bohr
         std::vector<std::pair<int, int>> answer_vector;
         int cur_state = 0;
         bool digit_flag = false;
-        int start_digit;
+        int start_digit = 0;
         int size_digit = 0;
         for (int i = 0; i != text.size(); i++)
         {
@@ -148,3 +151,4 @@ struct bohr
         return answer_vector;
     }
 };
+#endif

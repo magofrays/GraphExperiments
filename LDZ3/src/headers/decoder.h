@@ -1,3 +1,6 @@
+#ifndef DECODER_H
+#define DECODER_H
+
 #include <unordered_set>
 #include <string>
 #include <vector>
@@ -5,7 +8,7 @@
 #include <algorithm>
 #include <stack>
 #include <functional>
-#include "aho_carasic.h"
+#include "aho_corasick.h"
 #include <cmath>
 #include <sstream>
 
@@ -23,11 +26,11 @@ class Decoder
         std::function<double(double, double)> func;
     };
     double zero_limit = 0.001;
-    std::unordered_map<std::string, func> function_map;
+    std::unordered_map<std::string, func> func_map;
     std::unordered_set<std::string> first = {"-", "+"};
-    std::unordered_set<std::string> second = {"*", "/", "sqrt"};
+    std::unordered_set<std::string> second = {"*", "/"};
     std::unordered_set<std::string> third = {"^"};
-    std::unordered_set<std::string> fourth = {"sin", "cos", "tg", "ctg", "exp", "ln", "arcsin", "arccos", "arctg", "arcctg"};
+    std::unordered_set<std::string> fourth = {"sin", "cos", "tg", "ctg", "exp", "ln", "arcsin", "arccos", "arctg", "arcctg", "sqrt"};
     std::unordered_set<std::string> zero = {"(", ")"};
     std::vector<std::string> words_to_split = {
         "sin", "cos", "tg", "ctg", "sqrt", "exp",
@@ -42,42 +45,43 @@ public:
         {
             automation.add_string(word);
         }
-        function_map["sin"] = {"sin", false, [](double x, double plug)
-                               { return std::sin(x); }};
-        function_map["cos"] = {"cos", false, [](double x, double plug)
-                               { return std::cos(x); }};
-        function_map["tg"] = {"tg", false, [](double x, double plug)
-                              { return std::tan(x); }};
-        function_map["ctg"] = {"ctg", false, [](double x, double plug)
-                               { return 1 / std::tan(x); }};
-        function_map["exp"] = {"exp", false, [](double x, double plug)
-                               { return std::exp(x); }};
-        function_map["ln"] = {"ln", false, [](double x, double plug)
-                              { return std::log(x); }};
-        function_map["arcsin"] = {"arcsin", false, [](double x, double plug)
-                                  { return std::asin(x); }};
-        function_map["arccos"] = {"arccos", false, [](double x, double plug)
-                                  { return std::acos(x); }};
-        function_map["arctg"] = {"arctg", false, [](double x, double plug)
-                                 { return std::atan(x); }};
-        function_map["arcctg"] = {"arcctg", false, [](double x, double plug)
-                                  { return M_PI / 2 - std::atan(x); }};
-        function_map["sqrt"] = {"sqrt", false, [](double x, double plug)
-                                { return std::sqrt(x); }};
-        function_map["+"] = {"+", true, [](double x, double y)
-                             { return x + y; }};
-        function_map["-"] = {"-", true, [](double x, double y)
-                             { return x - y; }};
-        function_map["*"] = {"*", true, [](double x, double y)
-                             { return x * y; }};
-        function_map["/"] = {"/", true, [](double x, double y)
-                             { return x / y; }};
-        function_map["^"] = {"^", true, [](double x, double y)
-                             { return std::pow(x, y); }};
+        func_map["sin"] = {"sin", false, [](double x, double plug)
+                           { return std::sin(x); }};
+        func_map["cos"] = {"cos", false, [](double x, double plug)
+                           { return std::cos(x); }};
+        func_map["tg"] = {"tg", false, [](double x, double plug)
+                          { return std::tan(x); }};
+        func_map["ctg"] = {"ctg", false, [](double x, double plug)
+                           { return 1 / std::tan(x); }};
+        func_map["exp"] = {"exp", false, [](double x, double plug)
+                           { return std::exp(x); }};
+        func_map["ln"] = {"ln", false, [](double x, double plug)
+                          { return std::log(x); }};
+        func_map["arcsin"] = {"arcsin", false, [](double x, double plug)
+                              { return std::asin(x); }};
+        func_map["arccos"] = {"arccos", false, [](double x, double plug)
+                              { return std::acos(x); }};
+        func_map["arctg"] = {"arctg", false, [](double x, double plug)
+                             { return std::atan(x); }};
+        func_map["arcctg"] = {"arcctg", false, [](double x, double plug)
+                              { return M_PI / 2 - std::atan(x); }};
+        func_map["sqrt"] = {"sqrt", false, [](double x, double plug)
+                            { return std::sqrt(x); }};
+        func_map["+"] = {"+", true, [](double x, double y)
+                         { return x + y; }};
+        func_map["-"] = {"-", true, [](double x, double y)
+                         { return x - y; }};
+        func_map["*"] = {"*", true, [](double x, double y)
+                         { return x * y; }};
+        func_map["/"] = {"/", true, [](double x, double y)
+                         { return x / y; }};
+        func_map["^"] = {"^", true, [](double x, double y)
+                         { return std::pow(x, y); }};
+        func_map["x"] = {"x", false, [](double x, double y)
+                         { return x; }};
     }
 
-    std::vector<std::string>
-    parse(std::string &text)
+    std::vector<std::string> parse(std::string &text)
     {
         auto positions = automation.find_all_pos(text);
         std::sort(positions.begin(), positions.end());
@@ -110,7 +114,7 @@ public:
         }
     }
 
-    std::vector<std::string> postfix(std::vector<std::string> parsed_elements)
+    std::vector<std::string> postfix(std::vector<std::string> &parsed_elements)
     {
         std::stack<std::pair<std::string, int>> priority_stack;
         std::vector<std::string> result;
@@ -149,6 +153,7 @@ public:
             }
             else
             {
+
                 result.push_back(element);
             }
         }
@@ -169,14 +174,22 @@ public:
         return false;
     }
 
+    std::string double_to_string(double number, int precision)
+    {
+        std::ostringstream stream;
+        stream.precision(precision);
+        stream << std::fixed << number;
+        return stream.str();
+    }
+
     std::vector<std::string> simplify_postfix(std::vector<std::string> &postfix)
     {
         std::stack<std::vector<std::string>> operands;
         for (auto &element : postfix)
         {
-            if (function_map.find(element) != function_map.end())
+            if (func_map.find(element) != func_map.end() && element != "x")
             {
-                auto func = function_map[element];
+                auto func = func_map[element];
                 if (func.two_var_flag)
                 {
                     auto second = operands.top();
@@ -200,7 +213,7 @@ public:
                     if (first_is_num && second_is_num)
                     {
                         auto result = func.func(first_num, second_num);
-                        operands.push({std::to_string(result)});
+                        operands.push({double_to_string(result, 2)});
                     }
                     else if (element == "+") // кто-то не число
                     {
@@ -225,7 +238,7 @@ public:
                         {
                             for (int i = 0; i != second.size(); i++)
                             {
-                                if (function_map.find(second[i]) != function_map.end())
+                                if (func_map.find(second[i]) != func_map.end())
                                     continue;
                                 if (i % 2 != 1 || second[i + 1] != "*")
                                 {
@@ -332,7 +345,7 @@ public:
                     if (operand_is_num)
                     {
                         auto result = func.func(operand_num, 0);
-                        operands.push({std::to_string(result)});
+                        operands.push({double_to_string(result, 2)});
                     }
                     else
                     {
@@ -352,6 +365,16 @@ public:
         {
             throw std::logic_error("Expression is invalid!");
         }
+        // while (!operands.empty())
+        // {
+        //     std::swap(operands.top(), result);
+        //     result.insert(result.end(), operands.top().begin(), operands.top().end());
+        //     result.push_back("*");
+        //     operands.pop();
+        // }
         return result;
     }
+    friend class syntaxTree;
+    friend class syntaxNode;
 };
+#endif
