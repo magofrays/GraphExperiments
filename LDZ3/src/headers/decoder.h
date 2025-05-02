@@ -17,28 +17,62 @@ bool is_digits(const std::string &str)
     return std::all_of(str.begin(), str.end(), ::isdigit); // C++11
 }
 
+bool to_double(std::string &element, double &num)
+{
+    std::istringstream i(element);
+    if (i >> num)
+    {
+        return true;
+    }
+    return false;
+}
+
+std::string double_to_string(double number, int precision)
+{
+    std::ostringstream stream;
+    stream.precision(precision);
+    stream << std::fixed << number;
+    return stream.str();
+}
+
+struct func_container
+{
+    std::string name;
+    bool two_var_flag;
+    std::function<double(double, double)> func;
+};
+
 class Decoder
 {
-    struct func
-    {
-        std::string name;
-        bool two_var_flag;
-        std::function<double(double, double)> func;
-    };
+
     double zero_limit = 0.001;
-    std::unordered_map<std::string, func> func_map;
+
     std::unordered_set<std::string> first = {"-", "+"};
     std::unordered_set<std::string> second = {"*", "/"};
     std::unordered_set<std::string> third = {"^"};
-    std::unordered_set<std::string> fourth = {"sin", "cos", "tg", "ctg", "exp", "ln", "arcsin", "arccos", "arctg", "arcctg", "sqrt"};
+    std::unordered_set<std::string> fourth = {"sin", "cos", "tg", "ctg", "exp", "ln", "arcsin", "arccos", "arctg", "arcctg", "sqrt", "--"};
     std::unordered_set<std::string> zero = {"(", ")"};
     std::vector<std::string> words_to_split = {
         "sin", "cos", "tg", "ctg", "sqrt", "exp",
         "ln", "arcsin", "arccos", "arcctg", "arctg",
-        "-", "+", "*", "/", "(", ")", "^", "x"};
+        "-", "+", "*", "/", "(", ")", "^", "x", "--"};
     bohr automation;
+    static Decoder *instance_ptr;
 
 public:
+    std::unordered_map<std::string, func_container> func_map;
+    Decoder(const Decoder &) = delete;
+    void operator=(const Decoder &) = delete;
+
+    static Decoder *get()
+    {
+        if (instance_ptr == nullptr)
+        {
+            instance_ptr = new Decoder();
+        }
+
+        return instance_ptr;
+    }
     Decoder()
     {
         for (auto &word : words_to_split)
@@ -79,17 +113,33 @@ public:
                          { return std::pow(x, y); }};
         func_map["x"] = {"x", false, [](double x, double y)
                          { return x; }};
+        func_map["--"] = {"--", false, [](double x, double y) // унарный минус
+                          { return -x; }};
     }
 
     std::vector<std::string> parse(std::string &text)
     {
         auto positions = automation.find_all_pos(text);
-        std::sort(positions.begin(), positions.end());
-        for (int i = positions.size() - 1; i > 0; i--)
+        std::sort(positions.begin(), positions.end(),
+                  [](const auto &a, const auto &b)
+                  {
+                      if (a.first != b.first)
+                      {
+                          return a.first < b.first;
+                      }
+                      else
+                      {
+                          return a.second > b.second; // Если first равны, сортируем second (убывание)
+                      }
+                  });
+        int size = positions.size();
+        for (int i = 0; i < size - 2; i++)
         {
-            if (positions[i].first < positions[i - 1].first + positions[i - 1].second)
+            if (positions[i + 1].first < positions[i].first + positions[i].second)
             {
-                positions.erase(positions.begin() + i);
+                positions.erase(positions.begin() + i + 1);
+                size--;
+                i--;
             }
         }
         std::vector<std::string> parsed_elements;
@@ -164,23 +214,6 @@ public:
         }
         return result;
     }
-    bool to_double(std::string &element, double &num)
-    {
-        std::istringstream i(element);
-        if (i >> num)
-        {
-            return true;
-        }
-        return false;
-    }
-
-    std::string double_to_string(double number, int precision)
-    {
-        std::ostringstream stream;
-        stream.precision(precision);
-        stream << std::fixed << number;
-        return stream.str();
-    }
 
     std::vector<std::string> simplify_postfix(std::vector<std::string> &postfix)
     {
@@ -236,22 +269,7 @@ public:
                     {
                         if (first_is_num && std::abs(first_num) < zero_limit)
                         {
-                            for (int i = 0; i != second.size(); i++)
-                            {
-                                if (func_map.find(second[i]) != func_map.end())
-                                    continue;
-                                if (i % 2 != 1 || second[i + 1] != "*")
-                                {
-                                    if (second[i][0] == '-')
-                                    {
-                                        second[i].erase(second[i].begin());
-                                    }
-                                    else
-                                    {
-                                        second[i].insert(second[i].begin(), '-');
-                                    }
-                                }
-                            }
+                            second.push_back("--");
                             operands.push(second);
                         }
                         else if (second_is_num && std::abs(second_num) < zero_limit)
@@ -365,16 +383,12 @@ public:
         {
             throw std::logic_error("Expression is invalid!");
         }
-        // while (!operands.empty())
-        // {
-        //     std::swap(operands.top(), result);
-        //     result.insert(result.end(), operands.top().begin(), operands.top().end());
-        //     result.push_back("*");
-        //     operands.pop();
-        // }
         return result;
     }
+    ~Decoder() { instance_ptr = nullptr; }
     friend class syntaxTree;
     friend class syntaxNode;
 };
+
+Decoder *Decoder::instance_ptr = nullptr;
 #endif
