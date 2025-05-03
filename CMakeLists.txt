@@ -19,7 +19,13 @@ add_executable(LDZ2
     LDZ2/src/graph_tester.cpp
 )
 add_executable(LDZ3
+    LDZ3/decoder.cpp
+    LDZ3/syntax_node.cpp
+    LDZ3/simplify.cpp
+    LDZ3/derivative.cpp
+    LDZ3/syntax_tree.cpp
     LDZ3/main.cpp
+
 )
 target_include_directories(LDZ3 PRIVATE 
     LDZ3/src/headers
