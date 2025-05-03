@@ -17,11 +17,14 @@ public:
         auto first = decode.parse(raw_text);
         auto second = decode.postfix(first);
         create_tree(second);
+        simplify_tree();
     }
+
     double operator()(double x)
     {
         return (*root)(x);
     }
+
     void create_tree(std::vector<std::string> &postfix)
     {
         std::stack<syntaxNode *> operands;
@@ -37,9 +40,9 @@ public:
                 }
                 else if (d_func->two_var_flag)
                 {
-                    auto right = operands.top();
+                    auto *right = operands.top();
                     operands.pop();
-                    auto left = operands.top();
+                    auto *left = operands.top();
                     operands.pop();
                     syntaxNode *node = new syntaxNode(syntaxNode::func, d_func, -1);
                     node->left = left;
@@ -48,7 +51,7 @@ public:
                 }
                 else
                 {
-                    auto operand = operands.top();
+                    auto *operand = operands.top();
                     operands.pop();
                     syntaxNode *node = new syntaxNode(syntaxNode::func, d_func, -1);
                     node->left = operand;
@@ -57,7 +60,6 @@ public:
             }
             else
             {
-
                 double value;
                 to_double(element, value);
                 syntaxNode *node = new syntaxNode(syntaxNode::operand, nullptr, value);
@@ -99,8 +101,10 @@ public:
 
     void find_derivative()
     {
-        syntaxNode *new_root = diff(root);
+        syntaxNode *new_node = diff(root);
         delete_node(root);
+        auto *new_root = simplify(new_node);
+        delete_node(new_node);
         root = new_root;
     }
 

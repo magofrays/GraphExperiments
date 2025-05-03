@@ -7,6 +7,9 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+# add_compile_options(-fsanitize=address)
+# add_link_options(-fsanitize=address)
+
 
 add_executable(LDZ2
     LDZ2/main.cpp

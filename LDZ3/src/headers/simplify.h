@@ -11,7 +11,7 @@ syntaxNode *simplify_both(syntaxNode *node)
     new_node->right = simplify(node->right);
     if (new_node->left->type == syntaxNode::operand || new_node->right->type == syntaxNode::operand) // если больше не функции
     {
-        auto result = simplify(new_node);
+        auto *result = simplify(new_node);
         delete_node(new_node);
         return result;
     }
@@ -25,20 +25,21 @@ syntaxNode *simplify_right(syntaxNode *node)
     new_node->right = simplify(node->right);
     if (new_node->right->type == syntaxNode::operand)
     {
-        auto result = simplify(new_node);
+        auto *result = simplify(new_node);
         delete_node(new_node);
         return result;
     }
     return new_node;
 }
-syntaxNode *simplify_left(syntaxNode *node)
+syntaxNode *simplify_left(syntaxNode *node, bool one_var = false)
 {
     syntaxNode *new_node = new syntaxNode(node->type, node->func_info, node->value);
-    new_node->right = new syntaxNode(*(node->right));
+    if (!one_var)
+        new_node->right = new syntaxNode(*(node->right));
     new_node->left = simplify(node->left);
     if (new_node->left->type == syntaxNode::operand)
     {
-        auto result = simplify(new_node);
+        auto *result = simplify(new_node);
         delete_node(new_node);
         return result;
     }
@@ -101,13 +102,13 @@ syntaxNode *simplify_sub(syntaxNode *node)
     {
         if (node->left->value == 0)
         {
-            syntaxNode *new_node = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["--"]));
+            syntaxNode *new_node = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["~"]));
             new_node->left = new syntaxNode(*(node->right));
-            auto result = simplify(new_node);
+            auto *result = simplify(new_node);
             delete_node(new_node);
             return result;
         }
-        return simplify_left(node);
+        return simplify_right(node);
     }
     else if (node->right->type == syntaxNode::operand) // right is operand
     {
@@ -115,18 +116,18 @@ syntaxNode *simplify_sub(syntaxNode *node)
         {
             return new syntaxNode(*(node->left));
         }
-        return simplify_right(node);
+        return simplify_left(node);
     }
     return simplify_both(node);
 }
 
 syntaxNode *simplify_minus(syntaxNode *node)
 {
-    if (node->left->func_info->name == "--")
+    if (node->left->func_info->name == "~")
     {
         return new syntaxNode(*(node->left->left));
     }
-    return new syntaxNode(*(node));
+    return simplify_left(node, true);
 }
 
 syntaxNode *simplify_pow(syntaxNode *node)
@@ -187,6 +188,156 @@ syntaxNode *simplify_div(syntaxNode *node)
     return simplify_both(node);
 }
 
+syntaxNode *simplify_sin(syntaxNode *node)
+{
+    if (node->left->func_info->name == "arcsin")
+    {
+        auto *new_node = new syntaxNode(*(node->left->left));
+        auto *result = simplify(new_node);
+        delete_node(new_node);
+        return result;
+    }
+    return simplify_left(node, true);
+}
+
+syntaxNode *simplify_cos(syntaxNode *node)
+{
+    if (node->left->func_info->name == "arccos")
+    {
+        auto *new_node = new syntaxNode(*(node->left->left));
+        auto *result = simplify(new_node);
+        delete_node(new_node);
+        return result;
+    }
+    return simplify_left(node, true);
+}
+
+syntaxNode *simplify_arcsin(syntaxNode *node)
+{
+    if (node->left->func_info->name == "sin")
+    {
+        auto *new_node = new syntaxNode(*(node->left->left));
+        auto *result = simplify(new_node);
+        delete_node(new_node);
+        return result;
+    }
+    return simplify_left(node, true);
+}
+syntaxNode *simplify_arccos(syntaxNode *node)
+{
+    if (node->left->func_info->name == "cos")
+    {
+        auto *new_node = new syntaxNode(*(node->left->left));
+        auto *result = simplify(new_node);
+        delete_node(new_node);
+        return result;
+    }
+    return simplify_left(node, true);
+}
+
+syntaxNode *simplify_tg(syntaxNode *node)
+{
+    if (node->left->func_info->name == "arctg")
+    {
+        auto *new_node = new syntaxNode(*(node->left->left));
+        auto *result = simplify(new_node);
+        delete_node(new_node);
+        return result;
+    }
+    return simplify_left(node, true);
+}
+
+syntaxNode *simplify_ctg(syntaxNode *node)
+{
+    if (node->left->func_info->name == "arcctg")
+    {
+        auto *new_node = new syntaxNode(*(node->left->left));
+        auto *result = simplify(new_node);
+        delete_node(new_node);
+        return result;
+    }
+    return simplify_left(node, true);
+}
+
+syntaxNode *simplify_arctg(syntaxNode *node)
+{
+    if (node->left->func_info->name == "tg")
+    {
+        auto *new_node = new syntaxNode(*(node->left->left));
+        auto *result = simplify(new_node);
+        delete_node(new_node);
+        return result;
+    }
+    return simplify_left(node, true);
+}
+
+syntaxNode *simplify_arcctg(syntaxNode *node)
+{
+    if (node->left->func_info->name == "ctg")
+    {
+        auto *new_node = new syntaxNode(*(node->left->left));
+        auto *result = simplify(new_node);
+        delete_node(new_node);
+        return result;
+    }
+    return simplify_left(node, true);
+}
+
+syntaxNode *simplify_sqrt(syntaxNode *node)
+{
+    auto *new_node = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["^"]));
+    new_node->left = new syntaxNode(*(node->left));
+    new_node->right = new syntaxNode(syntaxNode::operand, nullptr, 0.5);
+    auto *result = simplify(new_node);
+    delete new_node;
+    return result;
+}
+
+syntaxNode *simplify_exp(syntaxNode *node)
+{
+    if (node->left->func_info->name == "ln")
+    {
+        auto *new_node = new syntaxNode(*(node->left->left));
+        auto *result = simplify(new_node);
+        delete_node(new_node);
+        return result;
+    }
+    else if (node->left->func_info->name == "*")
+    {
+        if (node->left->left->func_info->name == "ln")
+        {
+            auto *new_node = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["^"]));
+            new_node->left = new syntaxNode(*(node->left->left->left));
+            new_node->right = new syntaxNode(*(node->left->right));
+            auto *result = simplify(new_node);
+            delete_node(new_node);
+            return result;
+        }
+        else if (node->left->right->func_info->name == "ln")
+        {
+            auto *new_node = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["^"]));
+            new_node->left = new syntaxNode(*(node->left->left));
+            new_node->right = new syntaxNode(*(node->left->right));
+            auto *result = simplify(new_node);
+            delete_node(new_node);
+            return result;
+        }
+    }
+    return simplify_left(node, true);
+}
+
+syntaxNode *simplify_ln(syntaxNode *node)
+{
+    if (node->left->func_info->name == "exp")
+    {
+        auto *new_node = new syntaxNode(*(node->left->left));
+        auto *result = simplify(new_node);
+        delete_node(new_node);
+        return result;
+    }
+    return simplify_left(node, true);
+}
+
 syntaxNode *simplify(syntaxNode *node)
 {
     if (node->type == syntaxNode::func && node->func_info->name != "x")
@@ -226,9 +377,53 @@ syntaxNode *simplify(syntaxNode *node)
                 double value = node->func_info->func(node->left->value, 0);
                 return new syntaxNode(syntaxNode::operand, nullptr, value);
             }
-            else if (node->func_info->name == "--")
+            else if (node->func_info->name == "~")
             {
                 return simplify_minus(node);
+            }
+            else if (node->func_info->name == "exp")
+            {
+                return simplify_exp(node);
+            }
+            else if (node->func_info->name == "ln")
+            {
+                return simplify_ln(node);
+            }
+            else if (node->func_info->name == "sqrt")
+            {
+                return simplify_sqrt(node);
+            }
+            else if (node->func_info->name == "sin")
+            {
+                return simplify_sin(node);
+            }
+            else if (node->func_info->name == "cos")
+            {
+                return simplify_cos(node);
+            }
+            else if (node->func_info->name == "tg")
+            {
+                return simplify_tg(node);
+            }
+            else if (node->func_info->name == "ctg")
+            {
+                return simplify_ctg(node);
+            }
+            else if (node->func_info->name == "arcsin")
+            {
+                return simplify_arcsin(node);
+            }
+            else if (node->func_info->name == "arccos")
+            {
+                return simplify_arccos(node);
+            }
+            else if (node->func_info->name == "arctg")
+            {
+                return simplify_arctg(node);
+            }
+            else if (node->func_info->name == "arcctg")
+            {
+                return simplify_arcctg(node);
             }
         }
     }

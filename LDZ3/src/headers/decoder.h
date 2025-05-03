@@ -50,12 +50,12 @@ class Decoder
     std::unordered_set<std::string> first = {"-", "+"};
     std::unordered_set<std::string> second = {"*", "/"};
     std::unordered_set<std::string> third = {"^"};
-    std::unordered_set<std::string> fourth = {"sin", "cos", "tg", "ctg", "exp", "ln", "arcsin", "arccos", "arctg", "arcctg", "sqrt", "--"};
+    std::unordered_set<std::string> fourth = {"sin", "cos", "tg", "ctg", "exp", "ln", "arcsin", "arccos", "arctg", "arcctg", "sqrt", "~"};
     std::unordered_set<std::string> zero = {"(", ")"};
     std::vector<std::string> words_to_split = {
         "sin", "cos", "tg", "ctg", "sqrt", "exp",
         "ln", "arcsin", "arccos", "arcctg", "arctg",
-        "-", "+", "*", "/", "(", ")", "^", "x", "--"};
+        "-", "+", "*", "/", "(", ")", "^", "x", "~"};
     bohr automation;
     static Decoder *instance_ptr;
 
@@ -113,8 +113,8 @@ public:
                          { return std::pow(x, y); }};
         func_map["x"] = {"x", false, [](double x, double y)
                          { return x; }};
-        func_map["--"] = {"--", false, [](double x, double y) // унарный минус
-                          { return -x; }};
+        func_map["~"] = {"~", false, [](double x, double y) // унарный минус
+                         { return -x; }};
     }
 
     std::vector<std::string> parse(std::string &text)
@@ -269,7 +269,7 @@ public:
                     {
                         if (first_is_num && std::abs(first_num) < zero_limit)
                         {
-                            second.push_back("--");
+                            second.push_back("~");
                             operands.push(second);
                         }
                         else if (second_is_num && std::abs(second_num) < zero_limit)
@@ -385,7 +385,6 @@ public:
         }
         return result;
     }
-    ~Decoder() { instance_ptr = nullptr; }
     friend class syntaxTree;
     friend class syntaxNode;
 };

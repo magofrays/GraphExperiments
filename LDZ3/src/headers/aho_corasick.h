@@ -6,9 +6,11 @@
 #include <iostream>
 #include <string>
 
+const int vocab_size = 128;
 struct bohr_vertex
 {
-    char *next, *transitions;
+    char next[vocab_size];
+    char transitions[vocab_size];
     int pattern_num, pattern_size;
     int state, suffix_link, parent;
     bool end;
@@ -18,8 +20,6 @@ struct bohr_vertex
     {
         end = false;
         this->parent = parent;
-        next = new char[vocab_size];
-        transitions = new char[vocab_size];
         suffix_link = -1;
         pattern_num = -1;
         pattern_size = -1;
@@ -112,7 +112,7 @@ struct bohr
         for (int i = 0; i != text.size(); i++)
         {
             if (!digit_flag && (isdigit(text[i]) ||
-                                (i + 1 < text.size() && text[i] == '-' && isdigit(text[i + 1]))))
+                                (i + 1 < text.size() && i > 0 && text[i] == '~' && isdigit(text[i + 1]))))
             {
                 digit_flag = true;
                 start_digit = i;

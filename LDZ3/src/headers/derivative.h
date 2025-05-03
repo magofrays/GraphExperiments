@@ -20,7 +20,7 @@ syntaxNode *diff_mul(syntaxNode *node)
 }
 syntaxNode *diff_div(syntaxNode *node)
 {
-    syntaxNode *new_node = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["+"]));
+    syntaxNode *new_node = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["/"]));
     new_node->left = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["-"]));
     new_node->right = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["^"]));
     new_node->right->right = new syntaxNode(syntaxNode::operand, nullptr, 2);
@@ -50,9 +50,9 @@ syntaxNode *diff_pow(syntaxNode *node)
     {
         syntaxNode *new_node = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["exp"]));
         new_node->left = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["*"]));
-        new_node->left->left = new syntaxNode(*(node->right));
-        new_node->left->right = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["ln"]));
-        new_node->left->right->left = new syntaxNode(*(node->left));
+        new_node->left->right = new syntaxNode(*(node->right));
+        new_node->left->left = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["ln"]));
+        new_node->left->left->left = new syntaxNode(*(node->left));
         auto result = diff(new_node);
         delete_node(new_node);
         return result;
@@ -117,7 +117,7 @@ syntaxNode *diff_cos(syntaxNode *node)
     if (node->left->info() != "x")
     {
         syntaxNode *new_node = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["*"]));
-        new_node->right = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["--"]));
+        new_node->right = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["~"]));
         new_node->right->left = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["sin"]));
         new_node->right->left->left = new syntaxNode(*(node->left));
         new_node->left = diff(node->left);
@@ -125,7 +125,7 @@ syntaxNode *diff_cos(syntaxNode *node)
     }
     else
     {
-        syntaxNode *new_node = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["--"]));
+        syntaxNode *new_node = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["~"]));
         new_node->left = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["sin"]));
         new_node->left->left = new syntaxNode(*(node->left));
         return new_node;
@@ -159,35 +159,59 @@ syntaxNode *diff(syntaxNode *node)
         }
         else if (node->info() == "*")
         {
-            return diff_mul(node);
+            auto *new_node = diff_mul(node);
+            auto *result = simplify(new_node);
+            delete_node(new_node);
+            return result;
         }
         else if (node->info() == "/")
         {
-            return diff_div(node);
+            auto *new_node = diff_div(node);
+            auto *result = simplify(new_node);
+            delete_node(new_node);
+            return result;
         }
         else if (node->info() == "^")
         {
-            return diff_pow(node);
+            auto *new_node = diff_pow(node);
+            auto *result = simplify(new_node);
+            delete_node(new_node);
+            return result;
         }
         else if (node->info() == "exp")
         {
-            return diff_exp(node);
+            auto *new_node = diff_exp(node);
+            auto *result = simplify(new_node);
+            delete_node(new_node);
+            return result;
         }
         else if (node->info() == "ln")
         {
-            return diff_ln(node);
+            auto *new_node = diff_ln(node);
+            auto *result = simplify(new_node);
+            delete_node(new_node);
+            return result;
         }
         else if (node->info() == "sin")
         {
-            return diff_sin(node);
+            auto *new_node = diff_sin(node);
+            auto *result = simplify(new_node);
+            delete_node(new_node);
+            return result;
         }
         else if (node->info() == "cos")
         {
-            return diff_cos(node);
+            auto *new_node = diff_cos(node);
+            auto *result = simplify(new_node);
+            delete_node(new_node);
+            return result;
         }
-        else if (node->info() == "--")
+        else if (node->info() == "~")
         {
-            return diff_minus(node);
+            auto *new_node = diff_minus(node);
+            auto *result = simplify(new_node);
+            delete_node(new_node);
+            return result;
         }
     }
 
