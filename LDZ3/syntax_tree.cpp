@@ -8,6 +8,7 @@ syntaxTree::syntaxTree(std::string &raw_text)
     auto second = Decoder::get()->postfix(first);
     auto third = Decoder::get()->simplify_postfix(second);
     create_tree(third);
+    simplify_tree();
 }
 
 void syntaxTree::create_tree(std::vector<std::string> &postfix)

@@ -104,10 +104,10 @@ syntaxNode *simplify_mul(syntaxNode *node)
     else if (node->right->func_info->name == "/")
     {
         auto *new_node = new syntaxNode(node->right->type, node->right->func_info, node->right->value);
-        new_node->left = new syntaxNode(*(node->right->left));
-        new_node->right = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["*"]));
-        new_node->right->left = new syntaxNode(*(node->left));
-        new_node->right->right = new syntaxNode(*(node->right->left));
+        new_node->right = new syntaxNode(*(node->right->right));
+        new_node->left = new syntaxNode(syntaxNode::func, &(Decoder::get()->func_map["*"]));
+        new_node->left->left = new syntaxNode(*(node->left));
+        new_node->left->right = new syntaxNode(*(node->right->left));
         auto *result = simplify(new_node);
         delete_node(new_node);
         return result;
@@ -203,6 +203,10 @@ syntaxNode *simplify_sub(syntaxNode *node)
             return new syntaxNode(*(node->left));
         }
         return simplify_left(node);
+    }
+    if (postfix_node_string(node->left) == postfix_node_string(node->right))
+    {
+        return new syntaxNode(syntaxNode::operand, nullptr, 0);
     }
     return simplify_both(node);
 }
